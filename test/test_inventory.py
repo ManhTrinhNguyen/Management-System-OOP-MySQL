@@ -88,4 +88,22 @@ class TestInventory(unittest.TestCase):
     # Assert that commit was called
     self.mock_db.commit.assert_called()
     
+  def test_update_product_quantity(self):
+    # Call Method want to test
+    self.inventory.update_product_quantity(self.product.product_id, 10)
 
+    # Assert that the Select query was executed correctly 
+    select_call = unittest.mock.call(
+      'SELECT quantity FROM products WHERE product_id = %s',
+      (self.product.product_id,)
+    )
+    # Assert that the UPDATE query was executed correctly 
+    update_call = unittest.mock.call(
+      'UPDATE products SET quantity = %s, price = %s WHERE product_id = %s',
+      (self.mock_cursor.fetchone().__getitem__().__add__(), None, self.product.product_id)
+      )
+
+    # Assert both calls (Insert and update) were made 
+    self.mock_cursor.execute.assert_has_calls([select_call, update_call], any_order=True)
+
+    self.mock_db.commit.assert_called()

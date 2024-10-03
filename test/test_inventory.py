@@ -4,7 +4,7 @@ import pytest
 import sys 
 
 sys.path.insert(1, '/Users/trinhnguyen/Documents/Meta-Certificate/Database/Management-System-OOP-MySQL/')
-from main import Inventory, Product
+from main import Inventory, Product, Transaction
 from db_connector import Database
 
 class TestInventory(unittest.TestCase):
@@ -27,6 +27,7 @@ class TestInventory(unittest.TestCase):
 
     # Create a product instance to use in tests
     self.product = Product(1, 'Iphone 14', 'Newest Iphone', 20, 5000)
+
 
   def test_add_product(self):
     """Test case for adding a product."""
@@ -65,4 +66,26 @@ class TestInventory(unittest.TestCase):
     )
     # Assert that the commit was called once 
     self.mock_db.commit.assert_called_once()
+
+  def test_record_transaction(self):
+    # CAll method want to test
+    self.inventory.record_transaction(self.product.product_id, self.product.quantity, 'addition')
+
+    # Assert that the INSERT query was executed correctly
+    insert_call = unittest.mock.call(
+      'INSERT INTO transactions (product_id, quantity, transaction_type) VALUES (%s, %s, %s)',
+      (self.product.product_id, self.product.quantity, 'addition')
+    )
+
+    # Assert that the UPDATE query was executed correctly 
+    update_call = unittest.mock.call(
+      "UPDATE products SET quantity = %s, price = %s WHERE product_id = %s",
+      (self.mock_cursor.fetchone().__getitem__().__add__(), None, self.product.product_id)
+    )
+
+    # Assert both calls (INSERT and UPDATE) were made 
+    self.mock_cursor.execute.assert_has_calls([insert_call, update_call], any_order=True)
+    # Assert that commit was called
+    self.mock_db.commit.assert_called()
+    
 

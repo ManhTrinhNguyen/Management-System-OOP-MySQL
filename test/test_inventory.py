@@ -107,3 +107,14 @@ class TestInventory(unittest.TestCase):
     self.mock_cursor.execute.assert_has_calls([select_call, update_call], any_order=True)
 
     self.mock_db.commit.assert_called()
+
+  def test_view_product(self):
+    # Call method want to test
+    self.inventory.view_product()
+
+    # Assert that the Select was execute correctly
+    self.mock_cursor.execute.assert_called_with(
+      'SELECT * FROM products'
+    )
+    # No need to check for commit in a SELECT query.
+  

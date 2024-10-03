@@ -24,29 +24,33 @@ class Transaction:
   def __str__(self):
     return f"Transaction[ID: {self.transaction_id}, Product ID: {self.product_id}, Quantity: {self.quantity}, Type: {self.transaction_type}]"
   
-class Inventory(Database):
-  def __init__(self) -> None:
-    super().__init__()
+class Inventory:
+  def __init__(self,db) -> None:
+    self.db = db
+    self.cursor = self.db.cursor
 
   def add_product(self, product):
     query='INSERT INTO products (name, description, quantity, price) VALUES (%s, %s, %s, %s)'
-    self.execute(query, (product.name, product.description, product.quantity, product.price))
+    self.cursor.execute(query, (product.name, product.description, product.quantity, product.price))
+    self.db.db.commit()
     print(f'Product {product.name} added to inventory')
 
   def update_product(self, product_id, quantity, price):
     query ="UPDATE products SET quantity = %s, price = %s WHERE product_id = %s"
-    self.execute(query, (quantity, price, product_id))
+    self.cursor.execute(query, (quantity, price, product_id))
+    self.db.db.commit()
     print(f"Product ID {product_id} updated.")
 
   def remove_product(self, product_id):
     query='DELETE FROM products WHERE product_id=%s'
-    self.execute(query, (product_id,))
+    self.cursor.execute(query, (product_id,))
+    self.db.db.commit()
     print(f'Deleted product id {product_id}')
 
   def record_transaction(self, product_id, quantity, transaction_type):
     query='INSERT INTO transactions (product_id, quantity, transaction_type) VALUES (%s, %s, %s)'
-    self.execute(query, (product_id, quantity, transaction_type))
-
+    self.cursor.execute(query, (product_id, quantity, transaction_type))
+    
     # Update product quantity based on transaction type
     if transaction_type == 'addition':
       self.update_product_quantity(product_id, quantity)
@@ -80,8 +84,8 @@ class Inventory(Database):
     for name, quantity in report:
       print(f"Product: {name}, Quantity: {quantity}")
 
-inventory = Inventory()
+inventory = Inventory(Database())
 product_1 = Product(1, 'Iphone 14', 'Newest Iphone', 20, 5000)
 product_2 = Product(3, 'Iphone 16', 'Newest Iphone', 20, 6000)
-
-inventory.generate_report()
+inventory.add_product(product_1)
+  

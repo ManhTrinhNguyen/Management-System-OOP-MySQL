@@ -51,7 +51,18 @@ class TestInventory(unittest.TestCase):
       'UPDATE products SET quantity = %s, price = %s WHERE product_id = %s',
       (self.product.quantity, self.product.price, self.product.product_id)
     )
+    # Assert that the commit was called once
     self.mock_db.commit.assert_called_once()
-    
 
+  def test_remove_product(self):
+    # Call method want to test
+    self.inventory.remove_product(self.product.product_id)
+
+    # Assert that the SQL query was executed correctly 
+    self.mock_cursor.execute.assert_called_with(
+      'DELETE FROM products WHERE product_id=%s',
+      (self.product.product_id,)
+    )
+    # Assert that the commit was called once 
+    self.mock_db.commit.assert_called_once()
 
